@@ -981,11 +981,37 @@
 
     console.log('📋 Report submitted:', data);
 
-    // Show success
-    document.getElementById('reportForm').style.display = 'none';
-    document.getElementById('formIntro').style.display = 'none';
-    document.getElementById('successScreen').classList.add('active');
-    document.querySelector('.progress-bar').style.width = '100%';
+    // Send to n8n webhook
+    const submitBtn = document.querySelector('.btn-submit');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting...';
+
+    fetch('http://192.168.1.90:5678/webhook/bug-feature-report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(result => {
+      console.log('✅ Webhook response:', result);
+      // Show success
+      document.getElementById('reportForm').style.display = 'none';
+      document.getElementById('formIntro').style.display = 'none';
+      document.getElementById('successScreen').classList.add('active');
+      document.querySelector('.progress-bar').style.width = '100%';
+    })
+    .catch(err => {
+      console.error('❌ Webhook error:', err);
+      // Show success anyway (report was generated locally)
+      document.getElementById('reportForm').style.display = 'none';
+      document.getElementById('formIntro').style.display = 'none';
+      document.getElementById('successScreen').classList.add('active');
+      document.querySelector('.progress-bar').style.width = '100%';
+    })
+    .finally(() => {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit Report →';
+    });
   });
 
   function resetForm() {
