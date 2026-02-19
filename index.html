@@ -986,7 +986,7 @@
     submitBtn.disabled = true;
     submitBtn.textContent = 'Submitting...';
 
-    fetch('http://192.168.1.90:5678/webhook/bug-feature-report', {
+    fetch('https://redn8n.semantic.it.com/webhook/bug-feature-report', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
