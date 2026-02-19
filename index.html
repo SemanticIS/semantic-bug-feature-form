@@ -972,24 +972,26 @@
     const id = `ST-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${String(Math.floor(Math.random()*999)+1).padStart(3,'0')}`;
     document.getElementById('ticketId').textContent = id;
 
-    // Collect form data
+    // Collect form data as multipart (includes files)
     const formData = new FormData(this);
-    const data = Object.fromEntries(formData.entries());
-    data.files = uploadedFiles.map(f => f.name);
-    data.ticketId = id;
-    data.submittedAt = now.toISOString();
+    formData.set('ticketId', id);
+    formData.set('submittedAt', now.toISOString());
 
-    console.log('📋 Report submitted:', data);
+    // Append actual files
+    uploadedFiles.forEach((file, i) => {
+      formData.append('files', file, file.name);
+    });
 
-    // Send to n8n webhook
+    console.log('📋 Report submitted:', Object.fromEntries(formData.entries()));
+
+    // Send to n8n webhook as multipart/form-data
     const submitBtn = document.querySelector('.btn-submit');
     submitBtn.disabled = true;
     submitBtn.textContent = 'Submitting...';
 
     fetch('https://redn8n.semantic.it.com/webhook/bug-feature-report', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+      body: formData
     })
     .then(res => res.json())
     .then(result => {
